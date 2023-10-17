@@ -1,20 +1,19 @@
 package ir.farsroidx.m31.memory
 
 import ir.farsroidx.m31.AndromedaException
+import ir.farsroidx.m31.AndromedaProvider
 import ir.farsroidx.m31.additives.isExpired
 import ir.farsroidx.m31.additives.toExpirationTime
 
 internal class MemoryImpl(
-    private val config: MemoryConfig
+    private val provider: AndromedaProvider.Memory
 ) : Memory {
 
     private val runtimeMemory = mutableMapOf<String, MemoryModel>()
 
     override suspend fun <T : Any> store(key: String, value: T) {
         runtimeMemory[key] = MemoryModel(
-            value, config.expirationTime.toExpirationTime(
-                config.expirationUnit
-            )
+            value, provider.expTime.toExpirationTime(provider.expUnit)
         )
     }
 

@@ -14,17 +14,40 @@ import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.google.gson.Gson
 import ir.farsroidx.m31.AndromedaException
+import ir.farsroidx.m31.AndromedaProvider
 import ir.farsroidx.m31.additives.isCasted
 import ir.farsroidx.m31.additives.isExpired
 import ir.farsroidx.m31.additives.toExpirationTime
+import ir.farsroidx.m31.AndromedaTimeUnit
 import kotlinx.coroutines.flow.first
 
-internal class PreferenceImpl constructor(
-    context: Context, private val gson: Gson, private val config: PreferenceConfig
+internal class PreferenceImpl(
+    context: Context, private val gson: Gson, private val provider: AndromedaProvider.Preference
 ) : Preference {
 
+    init {
+
+        provider.expirationTime?.let {
+            if (it < 1) {
+                throw AndromedaException(
+                    "Time cannot be less than [1]."
+                )
+            }
+        }
+
+        provider.expirationUnit?.let {
+            if (it is AndromedaTimeUnit.Seconds) {
+                if ((provider.expirationTime ?: 0) < 15) {
+                    throw AndromedaException(
+                        "Time cannot be less than 15 seconds [minimum = 15s]."
+                    )
+                }
+            }
+        }
+    }
+
     private val Context._dataStore: DataStore<Preferences> by preferencesDataStore(
-        name = config.preferenceName
+        name = provider.preferenceName
     )
 
     private val dataStore: DataStore<Preferences> = context._dataStore
@@ -38,9 +61,7 @@ internal class PreferenceImpl constructor(
             ] = gson.toJson(
                 PreferenceModel(
                     value, getType(value),
-                    config.expirationTime.toExpirationTime(
-                        config.expirationUnit
-                    )
+                    provider.expirationTime.toExpirationTime(provider.expirationUnit)
                 )
             )
         }
@@ -171,4 +192,10 @@ internal class PreferenceImpl constructor(
             }
         }
     }
+
+    class PreferenceModel<T>(
+        val value: T,
+        val type: String,
+        val expirationTime: Long? = null
+    )
 }

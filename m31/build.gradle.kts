@@ -47,14 +47,9 @@ android {
     }
 
     buildFeatures {
+        viewBinding = true
         dataBinding = true
     }
-
-//    packagingOptions {
-//        resources {
-//            excludes += '/META-INF/{AL2.0,LGPL2.1}'
-//        }
-//    }
 }
 
 dependencies {
@@ -64,6 +59,14 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("androidx.recyclerview:recyclerview:1.3.1")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+
+    // Material
+    implementation("com.google.android.material:material:1.9.0")
+
+    // Lifecycle
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
 
     // Koin
     implementation("io.insert-koin:koin-android:3.5.0")
@@ -83,10 +86,12 @@ dependencies {
     // Google
     implementation("com.google.code.gson:gson:2.10.1")
 
-    // Needed
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+    // Others
     implementation("androidx.drawerlayout:drawerlayout:1.2.0")
     implementation("androidx.customview:customview:1.1.0")
+
+    api("com.airbnb.android:lottie:6.1.0")
+    api("com.github.samanzamani:PersianDate:1.6.1")
 
     // Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")

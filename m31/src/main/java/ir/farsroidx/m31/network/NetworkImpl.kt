@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.net.ConnectivityManager
 import io.ktor.client.HttpClient
+import ir.farsroidx.m31.AndromedaProvider
 import ir.farsroidx.m31.additives.networkCallback
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -12,7 +13,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 internal class NetworkImpl(
-    context: Context, private val config: NetworkConfig
+    context: Context, private val provider: AndromedaProvider.Network
 ) : Network {
 
     private val connectivityManager = context.getSystemService(

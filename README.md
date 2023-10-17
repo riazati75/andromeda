@@ -1,6 +1,6 @@
 # Andromeda Library
 
-Live Data : Post updated value, Preference, Memory, ...
+Views, Helpers, Functions, Utilities, Data Management and etc... for Android Apps
 
 ### Getting started
 
@@ -19,7 +19,7 @@ easy? [Use the template at the bottom](#editing-this-readme)!
 
 ```
 cd existing_repo
-git remote add origin https://gitlab.com/farsroidx/providers.git
+git remote add origin https://github.com/riazati75/andromeda.git
 git branch -M main
 git push -uf origin main
 ```

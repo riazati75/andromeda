@@ -8,13 +8,11 @@ import ir.farsroidx.m31.additives.install
 
 abstract class AndromedaApplication : Application() {
 
-    abstract val andromedaModules: List<AndromedaConfig>
-
     override fun onCreate() {
         super.onCreate()
 
         // Start Andromeda
-        Andromeda.install(this, andromedaModules)
+        Andromeda.install(this, getAndromedaProviders())
     }
 
     @CallSuper
@@ -22,4 +20,6 @@ abstract class AndromedaApplication : Application() {
         super.attachBaseContext(context)
         MultiDex.install(this)
     }
+
+    abstract fun getAndromedaProviders(): List<AndromedaProvider>
 }

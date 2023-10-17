@@ -12,26 +12,26 @@ import ir.farsroidx.m31.network.Network
 import ir.farsroidx.m31.preference.Preference
 import ir.farsroidx.m31.utils.Utils
 
-object Andromeda {
+object Andromeda { // Annotation (P)
 
-    val app: App by koinInjector()
+    val app       : App        by koinInjector()
 
-    val cache: Cache by koinInjector()
+    val cache     : Cache      by koinInjector()
 
-    val crypto: Crypto by koinInjector()
+    val crypto    : Crypto     by koinInjector()
 
-    val database: Database by koinInjector()
+    val database  : Database   by koinInjector()
 
     val dispatcher: Dispatcher by koinInjector()
 
-    val download: Download by koinInjector()
+    val download  : Download   by koinInjector()
 
-    val memory: Memory by koinInjector()
+    val memory    : Memory     by koinInjector()
 
-    val network: Network by koinInjector()
+    val network   : Network    by koinInjector()
 
     val preference: Preference by koinInjector()
 
-    val utils: Utils by koinInjector()
+    val utils     : Utils      by koinInjector()
 
 }
