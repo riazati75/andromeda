@@ -11,21 +11,16 @@ import ir.farsroidx.m31.R
 
 // TODO: Dialog ========================================================================= Dialog ===
 
-fun View.alertDialog(
-    @StyleRes styleResId: Int? = null,
-    invoker: AlertDialog.Builder.() -> Unit
-) = context.alertDialog(styleResId, invoker)
-
 fun Fragment.alertDialog(
-    @StyleRes styleResId: Int? = null,
+    @StyleRes styleResId: Int? = R.style.Theme_Andromeda_Dialog,
     invoker: AlertDialog.Builder.() -> Unit
 ) = requireContext().alertDialog(styleResId, invoker)
 
 fun Context.alertDialog(
-    @StyleRes styleResId: Int? = null,
+    @StyleRes styleResId: Int? = R.style.Theme_Andromeda_Dialog,
     invoker: AlertDialog.Builder.() -> Unit
 ) = if (styleResId == null) {
-    AlertDialog.Builder(this, R.style.Theme_Andromeda_Dialog)
+    AlertDialog.Builder(this)
 } else {
     AlertDialog.Builder(this, styleResId)
 }.apply(invoker).create()

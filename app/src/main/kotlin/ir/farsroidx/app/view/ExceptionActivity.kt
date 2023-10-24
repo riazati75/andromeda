@@ -2,7 +2,6 @@ package ir.farsroidx.app.view
 
 import ir.farsroidx.app.databinding.ActivityExceptionBinding
 import ir.farsroidx.m31.AndromedaActivity
-import ir.farsroidx.m31.AndromedaException
 
 class ExceptionActivity : AndromedaActivity<ActivityExceptionBinding>() {
 
@@ -15,7 +14,7 @@ class ExceptionActivity : AndromedaActivity<ActivityExceptionBinding>() {
             }
 
             killProcess.setOnClickListener {
-                throw AndromedaException(
+                throw RuntimeException(
                     "This error is issued only to test the software."
                 )
             }

@@ -1,9 +1,10 @@
 package ir.farsroidx.app.view
 
-import android.util.Log
 import ir.farsroidx.app.databinding.ActivityMemoryBinding
 import ir.farsroidx.m31.Andromeda
 import ir.farsroidx.m31.AndromedaActivity
+import ir.farsroidx.m31.additives.dLog
+import ir.farsroidx.m31.additives.eLog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -26,20 +27,19 @@ class MemoryActivity : AndromedaActivity<ActivityMemoryBinding>() {
                 Andromeda.memory.store("Key4", 4L)
                 Andromeda.memory.store("Key5", false)
 
-                Log.d("CentralCore", "memory0: " + Andromeda.memory.get<String>("Key0"))
-                Log.d("CentralCore", "memory1: " + Andromeda.memory.get<Int>("Key1"))
-                Log.d("CentralCore", "memory2: " + Andromeda.memory.get<Float>("Key2"))
-                Log.d("CentralCore", "memory3: " + Andromeda.memory.get<Double>("Key3"))
-                Log.d("CentralCore", "memory4: " + Andromeda.memory.get<Long>("Key4"))
-                Log.d("CentralCore", "memory5: " + Andromeda.memory.get<Boolean>("Key5"))
+                dLog("memory0: " + Andromeda.memory.get<String>("Key0"))
+                dLog("memory1: " + Andromeda.memory.get<Int>("Key1"))
+                dLog("memory2: " + Andromeda.memory.get<Float>("Key2"))
+                dLog("memory3: " + Andromeda.memory.get<Double>("Key3"))
+                dLog("memory4: " + Andromeda.memory.get<Long>("Key4"))
+                dLog("memory5: " + Andromeda.memory.get<Boolean>("Key5"))
 
                 try {
-                    Log.d(
-                        "CentralCore",
-                        "memory6: " + Andromeda.memory.get<String>("Key6", "Hi, i'm here!")
-                    )
+
+                    dLog("memory6: " + Andromeda.memory.get<String>("Key6", "Hi, i'm here!"))
+
                 } catch (e: Exception) {
-                    Log.d("CentralCore", "Exception (memory6): " + e.message)
+                    eLog("Exception (memory6): " + e.message)
                 }
 
 //            Providers.preference.store("Key0", "value0")

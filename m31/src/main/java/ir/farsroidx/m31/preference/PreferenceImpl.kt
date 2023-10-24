@@ -1,101 +1,128 @@
+@file:Suppress("UNCHECKED_CAST")
+
 package ir.farsroidx.m31.preference
 
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.floatPreferencesKey
-import androidx.datastore.preferences.core.intPreferencesKey
-import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.google.gson.Gson
-import ir.farsroidx.m31.AndromedaException
 import ir.farsroidx.m31.AndromedaProvider
-import ir.farsroidx.m31.additives.isCasted
 import ir.farsroidx.m31.additives.isExpired
 import ir.farsroidx.m31.additives.toExpirationTime
-import ir.farsroidx.m31.AndromedaTimeUnit
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import java.io.IOException
 
 internal class PreferenceImpl(
     context: Context, private val gson: Gson, private val provider: AndromedaProvider.Preference
 ) : Preference {
 
-    init {
-
-        provider.expirationTime?.let {
-            if (it < 1) {
-                throw AndromedaException(
-                    "Time cannot be less than [1]."
-                )
-            }
-        }
-
-        provider.expirationUnit?.let {
-            if (it is AndromedaTimeUnit.Seconds) {
-                if ((provider.expirationTime ?: 0) < 15) {
-                    throw AndromedaException(
-                        "Time cannot be less than 15 seconds [minimum = 15s]."
-                    )
-                }
-            }
-        }
-    }
-
-    private val Context._dataStore: DataStore<Preferences> by preferencesDataStore(
-        name = provider.preferenceName
-    )
+    private val Context._dataStore: DataStore<Preferences> by preferencesDataStore(provider.name)
 
     private val dataStore: DataStore<Preferences> = context._dataStore
 
-    override suspend fun <T> store(key: String, value: T) {
+    override suspend fun store(key: String, value: String) =
+        storeDataToPreferences(key, value)
+
+    override suspend fun store(key: String, value: Int) =
+        storeDataToPreferences(key, value)
+
+    override suspend fun store(key: String, value: Float) =
+        storeDataToPreferences(key, value)
+
+    override suspend fun store(key: String, value: Double) =
+        storeDataToPreferences(key, value)
+
+    override suspend fun store(key: String, value: Long) =
+        storeDataToPreferences(key, value)
+
+    override suspend fun store(key: String, value: Boolean) =
+        storeDataToPreferences(key, value)
+
+    override suspend fun store(key: String, value: Set<String>) =
+        storeDataToPreferences(key, value)
+
+    override suspend fun get(key: String, alternate: String): String =
+        getDataToPreferences(key, alternate)
+
+    override suspend fun get(key: String, alternate: Int): Int =
+        getDataToPreferences(key, alternate)
+
+    override suspend fun get(key: String, alternate: Float): Float =
+        getDataToPreferences(key, alternate)
+
+    override suspend fun get(key: String, alternate: Double): Double =
+        getDataToPreferences(key, alternate)
+
+    override suspend fun get(key: String, alternate: Long): Long =
+        getDataToPreferences(key, alternate)
+
+    override suspend fun get(key: String, alternate: Boolean): Boolean =
+        getDataToPreferences(key, alternate)
+
+    override suspend fun get(key: String, alternate: Set<String>): Set<String> =
+        getDataToPreferences(key, alternate)
+
+    private suspend fun <T> storeDataToPreferences(key: String, value: T) {
         dataStore.edit { transform ->
-            transform[
-                getStringPreferenceKey(
-                    key
-                )
-            ] = gson.toJson(
+            transform[stringPreferencesKey(key)] = gson.toJson(
                 PreferenceModel(
-                    value, getType(value),
-                    provider.expirationTime.toExpirationTime(provider.expirationUnit)
+                    value, provider.expTime.toExpirationTime(
+                        provider.expUnit
+                    )
                 )
             )
         }
     }
 
-    override suspend fun <T> get(key: String, alternate: T): T {
+    private suspend fun <T> getDataToPreferences(key: String, alternate: T): T {
 
-        val preferences = dataStore.data.first()
+        val dataFlow = dataStore.data
+            .catch { throwable ->
+                if (throwable is IOException) {
+                    emit(emptyPreferences())
+                } else {
+                    throw throwable
+                }
+            }
+            .map { preferences ->
+                preferences[stringPreferencesKey(key)]
+            }
 
-        val value = preferences[getStringPreferenceKey(key)] ?: return alternate
+        val value = dataFlow.first() ?: return alternate
 
         val deserialize = gson.fromJson(value, PreferenceModel::class.java)
 
-        if (deserialize.expirationTime.isExpired()) return alternate
+        return if (deserialize.expirationTime.isExpired()) {
+            alternate
+        } else deserialize.value as T
+    }
 
-        return alternate
+    override suspend fun isKeyStored(key: String): Boolean {
+        return dataStore.data
+            .map { preference ->
+                preference.contains(
+                    stringPreferencesKey(key)
+                )
+            }
+            .first()
     }
 
     override suspend fun remove(vararg keys: String) {
 
-        keys.forEach { key ->
+        dataStore.edit { preferences ->
 
-            dataStore.edit { transform ->
+            keys.forEach { key ->
 
-                var dataStoreKey: Preferences.Key<*>? = null
+                val dataStoreKey = stringPreferencesKey(key)
 
-                transform.asMap().forEach {
-                    if (it.key.name == key) {
-                        dataStoreKey = it.key
-                    }
-                }
-
-                if (dataStoreKey != null) {
-                    transform.remove(dataStoreKey!!)
+                if (preferences.contains(dataStoreKey)) {
+                    preferences.remove(dataStoreKey)
                 }
             }
         }
@@ -107,95 +134,5 @@ internal class PreferenceImpl(
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
-    private fun <T> getPreferenceKey(key: String, typeHolder: T): Preferences.Key<T> {
-
-        val generatedKey: Preferences.Key<*>
-
-        when {
-            typeHolder is String -> {
-                generatedKey = stringPreferencesKey(key)
-            }
-
-            typeHolder is Int -> {
-                generatedKey = intPreferencesKey(key)
-            }
-
-            typeHolder is Float -> {
-                generatedKey = floatPreferencesKey(key)
-            }
-
-            typeHolder is Double -> {
-                generatedKey = doublePreferencesKey(key)
-            }
-
-            typeHolder is Long -> {
-                generatedKey = longPreferencesKey(key)
-            }
-
-            typeHolder is Boolean -> {
-                generatedKey = booleanPreferencesKey(key)
-            }
-
-            isCasted<Set<String>>(typeHolder) -> {
-                generatedKey = stringSetPreferencesKey(key)
-            }
-
-            else -> {
-                throw AndromedaException(
-                    "Value type is not supported. Use only types [String,Int,Float,Double,Long,Boolean,Set<String>]."
-                )
-            }
-        }
-
-        return (generatedKey as Preferences.Key<T>)
-    }
-
-    private fun getStringPreferenceKey(key: String): Preferences.Key<String> {
-        return stringPreferencesKey(key)
-    }
-
-    private fun <T> getType(value: T): String {
-        return when {
-            value is String -> {
-                "string"
-            }
-
-            value is Int -> {
-                "int"
-            }
-
-            value is Float -> {
-                "float"
-            }
-
-            value is Double -> {
-                "double"
-            }
-
-            value is Long -> {
-                "long"
-            }
-
-            value is Boolean -> {
-                "boolean"
-            }
-
-            isCasted<Set<String>>(value) -> {
-                "set"
-            }
-
-            else -> {
-                throw AndromedaException(
-                    "Value type is not supported. Use only types [String,Int,Float,Double,Long,Boolean,Set<String>]."
-                )
-            }
-        }
-    }
-
-    class PreferenceModel<T>(
-        val value: T,
-        val type: String,
-        val expirationTime: Long? = null
-    )
+    class PreferenceModel<T>(val value: T, val expirationTime: Long? = null)
 }

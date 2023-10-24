@@ -2,6 +2,8 @@
 
 package ir.farsroidx.m31.additives
 
+import android.os.Handler
+import android.os.Looper
 import com.google.gson.Gson
 import ir.farsroidx.m31.AndromedaApplication
 import ir.farsroidx.m31.AndromedaException
@@ -24,12 +26,6 @@ import ir.farsroidx.m31.network.Network
 import ir.farsroidx.m31.network.NetworkImpl
 import ir.farsroidx.m31.preference.Preference
 import ir.farsroidx.m31.preference.PreferenceImpl
-import ir.farsroidx.m31.utils.Utils
-import ir.farsroidx.m31.utils.UtilsImpl
-import ir.farsroidx.m31.utils.common.CommonUtils
-import ir.farsroidx.m31.utils.common.CommonUtilsImpl
-import ir.farsroidx.m31.utils.time.TimeUtils
-import ir.farsroidx.m31.utils.time.TimeUtilsImpl
 import ir.farsroidx.m31.view.exception.AndromedaExceptionHandler
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -51,14 +47,22 @@ internal inline fun <reified T> koinInjector(
     }
 }
 
-internal fun initializedKoin(
-    application: AndromedaApplication, providers: List<AndromedaProvider>
-) = startKoin {
+internal inline fun <reified T> isCasted(instance: Any?) = (instance is T)
+
+internal fun AndromedaApplication.installAndromeda(providers: List<AndromedaProvider>) = startKoin {
+
+    val application = this@installAndromeda
+
     androidLogger(Level.NONE)
+
     androidContext(application)
+
     mutableListOf(commonModule()).apply {
+
         providers.forEach { provider ->
+
             when (provider) {
+
                 is AndromedaProvider.ExceptionUi -> exceptionModule(application, provider)
                 is AndromedaProvider.Application -> add(applicationModule(        ))
                 is AndromedaProvider.Cache       -> add(cacheModule      (provider))
@@ -68,7 +72,6 @@ internal fun initializedKoin(
                 is AndromedaProvider.Memory      -> add(memoryModule     (provider))
                 is AndromedaProvider.Network     -> add(networkModule    (provider))
                 is AndromedaProvider.Preference  -> add(preferenceModule (provider))
-                is AndromedaProvider.Utils       -> add(utilsModule      (provider))
                 else -> {
                     throw AndromedaException(
                         "This type of AndromedaConfig is not supported, this config is invalid."
@@ -76,6 +79,7 @@ internal fun initializedKoin(
                 }
             }
         }
+
         modules(this)
     }
 }
@@ -89,17 +93,19 @@ private fun commonModule() = module {
     single<Dispatcher> {
         DispatcherImpl()
     }
+
+    single<Handler> {
+        Handler(Looper.getMainLooper())
+    }
 }
 
 private fun exceptionModule(
     application: AndromedaApplication, provider: AndromedaProvider.ExceptionUi
 ) {
-    validationEmail(provider.developerEmail)
     AndromedaExceptionHandler.install(application, provider.developerEmail)
 }
 
 private fun applicationModule() = module {
-
     single<App> {
         AppImpl(androidContext())
     }
@@ -150,20 +156,5 @@ private fun preferenceModule(provider: AndromedaProvider.Preference) = module {
         PreferenceImpl(
             androidContext(), get(), provider
         )
-    }
-}
-
-private fun utilsModule(provider: AndromedaProvider.Utils) = module {
-
-    single<CommonUtils> {
-        CommonUtilsImpl(get())
-    }
-
-    single<TimeUtils> {
-        TimeUtilsImpl()
-    }
-
-    single<Utils> {
-        UtilsImpl(androidContext(), provider, get(), get())
     }
 }

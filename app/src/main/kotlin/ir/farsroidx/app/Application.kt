@@ -40,17 +40,16 @@ class Application : AndromedaApplication() {
             ),
 
             // TODO: if you want use of network module =============================================
-            AndromedaProvider.Network,
+            AndromedaProvider.Network(
+                "https://jsonplaceholder.typicode.com/",
+                10_000
+            ),
 
             // TODO: if you want use of preference module ==========================================
             AndromedaProvider.Preference(
                 "farsroidx-preferences",
                 1, AndromedaTimeUnit.Day
             ),
-
-            // TODO: if you want use of utils module ===============================================
-            AndromedaProvider.Utils,
-
         )
     }
 }

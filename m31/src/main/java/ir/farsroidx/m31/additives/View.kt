@@ -1,9 +1,10 @@
+@file:Suppress("unused")
+
 package ir.farsroidx.m31.additives
 
 import android.app.Activity
 import android.graphics.Color
 import android.graphics.Point
-import android.telephony.PhoneNumberUtils
 import android.view.MotionEvent
 import android.view.View
 import android.widget.EditText
@@ -26,19 +27,11 @@ fun View.visible() {
 }
 
 fun View.visibleOrGone(isVisible: Boolean) {
-    if (isVisible) {
-        this.visibility = View.VISIBLE
-    } else {
-        this.visibility = View.GONE
-    }
+    this.visibility = if (isVisible) View.VISIBLE else View.GONE
 }
 
 fun View.visibleOrInvisible(isVisible: Boolean) {
-    if (isVisible) {
-        this.visibility = View.VISIBLE
-    } else {
-        this.visibility = View.INVISIBLE
-    }
+    this.visibility = if (isVisible) View.VISIBLE else View.INVISIBLE
 }
 
 fun View.enable() {
@@ -120,11 +113,6 @@ fun EditText.readString(): String {
 
 fun EditText.isEmptyString(): Boolean {
     return readString().isEmpty()
-}
-
-fun EditText.isValidPhone(): Boolean {
-    return readString().startsWith("09") &&
-        PhoneNumberUtils.isGlobalPhoneNumber(readString())
 }
 
 fun ViewPager2.runSimpleSlider(

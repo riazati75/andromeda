@@ -10,7 +10,6 @@ import ir.farsroidx.m31.download.Download
 import ir.farsroidx.m31.memory.Memory
 import ir.farsroidx.m31.network.Network
 import ir.farsroidx.m31.preference.Preference
-import ir.farsroidx.m31.utils.Utils
 
 object Andromeda { // Annotation (P)
 
@@ -31,7 +30,5 @@ object Andromeda { // Annotation (P)
     val network   : Network    by koinInjector()
 
     val preference: Preference by koinInjector()
-
-    val utils     : Utils      by koinInjector()
 
 }

@@ -25,14 +25,14 @@ import androidx.core.text.underline
 import androidx.lifecycle.lifecycleScope
 import ir.farsroidx.m31.AndromedaActivity
 import ir.farsroidx.m31.R
-import ir.farsroidx.m31.additives.gone
+import ir.farsroidx.m31.additives.toastLong
 import ir.farsroidx.m31.additives.visible
-import ir.farsroidx.m31.databinding.ActivityExceptionBinding
+import ir.farsroidx.m31.databinding.ActivityAndromedaExceptionBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class AndromedaExceptionActivity : AndromedaActivity<ActivityExceptionBinding>() {
+internal class AndromedaExceptionActivity : AndromedaActivity<ActivityAndromedaExceptionBinding>() {
 
     private var developerEmail: String = ""
     private val emailType     : String = "text/html"
@@ -41,33 +41,38 @@ class AndromedaExceptionActivity : AndromedaActivity<ActivityExceptionBinding>()
 
     override fun onInitialized() {
 
-        binding.btnClose.setOnClickListener(::onClosePressed)
+        binding {
 
-        binding.btnSendMail.setOnClickListener(::onSendPressed)
+            btnClose.setOnClickListener(::onClosePressed)
 
-        developerEmail = intent.getStringExtra(AndromedaExceptionHandler.EXTRA_DEVELOPER) ?: ""
+            btnSendMail.setOnClickListener(::onSendPressed)
 
-        if (developerEmail.isEmpty()) {
-            binding.btnSendMail.gone()
-        } else {
-            binding.btnSendMail.visible()
-        }
+            developerEmail = intent.getStringExtra(AndromedaExceptionHandler.EXTRA_DEVELOPER) ?: ""
 
-        intent.getParcelableExtra<ApplicationErrorReport>(AndromedaExceptionHandler.EXTRA_THROWABLE)
-            ?.let { errorReport ->
+            btnSendMail.visible()
+
+            intent.getParcelableExtra<ApplicationErrorReport>(
+                AndromedaExceptionHandler.EXTRA_THROWABLE
+            )?.let { errorReport ->
+
                 try {
+
                     if (developerEmail.isNotEmpty()) {
+
                         showErrorInfo(errorReport)
+
                     } else {
-                        Toast.makeText(
-                            this, "Developer Email not configuration.", Toast.LENGTH_LONG
-                        ).show()
+
+                        toastLong("Developer Email not configuration.")
+
                         finish()
                     }
+
                 } catch (throwable: Throwable) {
                     showReportActivity(throwable)
                 }
             }
+        }
     }
 
     private fun onClosePressed(view: View) {

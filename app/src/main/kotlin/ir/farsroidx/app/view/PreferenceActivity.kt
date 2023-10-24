@@ -4,6 +4,7 @@ import android.util.Log
 import ir.farsroidx.app.databinding.ActivityPreferenceBinding
 import ir.farsroidx.m31.Andromeda
 import ir.farsroidx.m31.AndromedaActivity
+import ir.farsroidx.m31.additives.eLog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -39,9 +40,11 @@ class PreferenceActivity : AndromedaActivity<ActivityPreferenceBinding>() {
                 )
 
                 try {
-                    Andromeda.preference.store("Key7", mutableSetOf(5, 7, 9))
+
+                    Andromeda.preference.store("Key7", mutableSetOf("5", "7", "9"))
+
                 } catch (e: Exception) {
-                    Log.d("CentralCore", "Exception (pref-store-Key7): " + e.message)
+                    eLog("Exception (pref-store-Key7): " + e.message)
                 }
             }
         }

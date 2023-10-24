@@ -3,7 +3,6 @@
 package ir.farsroidx.m31.view.exception
 
 import android.app.ActivityManager
-import android.app.Application
 import android.app.ApplicationErrorReport
 import android.content.Context
 import android.content.Intent

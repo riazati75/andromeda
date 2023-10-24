@@ -4,15 +4,15 @@ import android.app.Application
 import android.content.Context
 import androidx.annotation.CallSuper
 import androidx.multidex.MultiDex
-import ir.farsroidx.m31.additives.install
+import ir.farsroidx.m31.additives.installAndromeda
 
 abstract class AndromedaApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
 
-        // Start Andromeda
-        Andromeda.install(this, getAndromedaProviders())
+        installAndromeda( getAndromedaProviders() )
+
     }
 
     @CallSuper

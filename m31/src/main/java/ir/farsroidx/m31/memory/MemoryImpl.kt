@@ -1,6 +1,7 @@
+@file:Suppress("UNCHECKED_CAST")
+
 package ir.farsroidx.m31.memory
 
-import ir.farsroidx.m31.AndromedaException
 import ir.farsroidx.m31.AndromedaProvider
 import ir.farsroidx.m31.additives.isExpired
 import ir.farsroidx.m31.additives.toExpirationTime
@@ -11,49 +12,19 @@ internal class MemoryImpl(
 
     private val runtimeMemory = mutableMapOf<String, MemoryModel>()
 
-    override suspend fun <T : Any> store(key: String, value: T) {
+    override fun <T : Any> store(key: String, value: T) {
         runtimeMemory[key] = MemoryModel(
             value, provider.expTime.toExpirationTime(provider.expUnit)
         )
     }
 
-    @Suppress("UNCHECKED_CAST")
-    override suspend fun <T : Any> getByNull(key: String): T? {
-        return if (runtimeMemory.containsKey(key)) {
-            val valueObject = runtimeMemory[key]!!
-            if (valueObject.expirationTime.isExpired()) {
-                null
-            } else (valueObject.value as T)
-        } else {
-            null
-        }
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    override suspend fun <T : Any> get(key: String): T {
-        if (runtimeMemory.containsKey(key)) {
+    override fun <T : Any> get(key: String, alternate: T?): T? {
+        return if (isKeyStored(key)) {
             return (runtimeMemory[key]!!.value as T)
-        } else {
-            throw AndromedaException("There is no such key in memory.")
-        }
+        } else alternate
     }
 
-    @Suppress("UNCHECKED_CAST")
-    override suspend fun <T : Any> get(key: String, alternate: T?): T {
-
-        if (runtimeMemory.containsKey(key)) {
-            return (runtimeMemory[key]!!.value as T)
-        }
-
-        if (alternate == null)
-            throw AndromedaException(
-                "There is no such key in memory."
-            )
-
-        return alternate
-    }
-
-    override suspend fun containsKey(key: String): Boolean {
+    override fun isKeyStored(key: String): Boolean {
         return if (runtimeMemory.containsKey(key)) {
             if (runtimeMemory[key]?.expirationTime.isExpired()) {
                 runtimeMemory.remove(key)
@@ -62,7 +33,7 @@ internal class MemoryImpl(
         } else false
     }
 
-    override suspend fun remove(vararg keys: String) {
+    override fun remove(vararg keys: String) {
         keys.forEach {
             if (runtimeMemory.containsKey(it)) {
                 runtimeMemory.remove(
@@ -72,10 +43,7 @@ internal class MemoryImpl(
         }
     }
 
-    override suspend fun clear() = runtimeMemory.clear()
+    override fun clear() = runtimeMemory.clear()
 
-    private data class MemoryModel(
-        val value: Any,
-        val expirationTime: Long? = null
-    )
+    private data class MemoryModel(val value: Any, val expirationTime: Long? = null)
 }

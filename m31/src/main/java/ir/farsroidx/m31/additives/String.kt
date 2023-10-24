@@ -53,6 +53,8 @@ private fun String.getLevenshteinDistance(other: String): Int {
     return t[m][n]
 }
 
+fun String.removeWhitespace() = this.trim().filterNot { it.isWhitespace() }
+
 fun SpannableStringBuilder.appendNewLine(
     value: CharSequence,
     enterCount: Int = 1

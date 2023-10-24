@@ -12,8 +12,8 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        multiDexEnabled = true
-        minSdk = 21
+        multiDexEnabled           = true
+        minSdk                    = 21
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
@@ -47,7 +47,7 @@ android {
     }
 
     buildFeatures {
-        viewBinding = true
+//        viewBinding = true
         dataBinding = true
     }
 }
@@ -57,7 +57,6 @@ dependencies {
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.multidex:multidex:2.0.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("androidx.cardview:cardview:1.0.0")
     implementation("androidx.recyclerview:recyclerview:1.3.1")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 
@@ -73,12 +72,15 @@ dependencies {
     implementation("io.insert-koin:koin-ktor:3.5.1")
 
     // Room Database
-    implementation("androidx.room:room-runtime:2.5.2")
-    implementation("androidx.room:room-ktx:2.5.2")
-    kapt("androidx.room:room-compiler:2.5.2")
+    implementation("androidx.room:room-runtime:2.6.0-rc01")
+    implementation("androidx.room:room-ktx:2.6.0-rc01")
+    kapt("androidx.room:room-compiler:2.6.0-rc01")
 
     // Ktor
+    implementation("io.ktor:ktor-client-core:2.3.5")
     implementation("io.ktor:ktor-client-okhttp:2.3.5")
+    implementation("io.ktor:ktor-client-android:2.3.5")
+    implementation("io.ktor:ktor-client-serialization:2.3.5")
 
     // Preferences
     implementation("androidx.datastore:datastore-preferences:1.0.0")
@@ -87,8 +89,8 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
 
     // Others
-    implementation("androidx.drawerlayout:drawerlayout:1.2.0")
-    implementation("androidx.customview:customview:1.1.0")
+//    implementation("androidx.drawerlayout:drawerlayout:1.2.0")
+//    implementation("androidx.customview:customview:1.1.0")
 
     api("com.airbnb.android:lottie:6.1.0")
     api("com.github.samanzamani:PersianDate:1.6.1")

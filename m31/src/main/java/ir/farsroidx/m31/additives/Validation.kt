@@ -1,7 +1,10 @@
+@file:Suppress("unused")
+
 package ir.farsroidx.m31.additives
 
+import android.telephony.PhoneNumberUtils
 import android.util.Patterns
-import ir.farsroidx.m31.AndromedaException
+import android.widget.EditText
 
 // TODO: Validation ================================================================= Validation ===
 
@@ -13,9 +16,8 @@ fun String.isValidIranianNationalCode() = this.takeIf {
     if (sum < 2) check == sum else check + sum == 11
 } ?: false
 
-fun validationEmail(email: String) {
-    val isSuccess = Patterns.EMAIL_ADDRESS.matcher(email).matches()
-    if (!isSuccess) {
-        throw AndromedaException("Developer Email is Invalid.")
-    }
+fun String.isValidEmail(): Boolean = Patterns.EMAIL_ADDRESS.matcher(this).matches()
+
+fun EditText.isValidPhone(prefix: String = "09"): Boolean {
+    return readString().startsWith(prefix) && PhoneNumberUtils.isGlobalPhoneNumber(readString())
 }

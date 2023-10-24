@@ -7,9 +7,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/white"
-        android:orientation="vertical"
         android:layoutDirection="ltr"
-        tools:context=".exception.AndromedaExceptionActivity">
+        android:orientation="vertical"
+        tools:context=".view.exception.AndromedaExceptionActivity">
 
         <RelativeLayout
             android:id="@+id/toolbar"
@@ -33,6 +33,7 @@
                 tools:ignore="UsingOnClickInXml" />
 
             <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/txtTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
@@ -41,7 +42,7 @@
                 android:gravity="center"
                 android:padding="2dp"
                 android:singleLine="true"
-                android:text="Crash Reporter"
+                android:text="@string/m31_crash_reporter_title"
                 android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
                 android:textColor="@color/white" />
 
@@ -75,7 +76,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:lottie_autoPlay="true"
                     app:lottie_loop="true"
-                    app:lottie_rawRes="@raw/exception_error"
+                    app:lottie_rawRes="@raw/m31_exception_error"
                     app:lottie_renderMode="automatic" />
 
                 <LinearLayout
@@ -101,6 +102,7 @@
                         android:layout_marginEnd="4dp"
                         android:clickable="true"
                         android:focusable="true"
+                        android:gravity="start"
                         android:lineSpacingExtra="4dp"
                         android:padding="2dp" />
 
@@ -112,7 +114,7 @@
                         android:layout_marginTop="14dp"
                         android:layout_marginEnd="4sp"
                         android:padding="2dp"
-                        android:text="Stack Trace:"
+                        android:text="@string/m31_stack_trace"
                         android:textColor="@color/blue_grey_900"
                         android:textSize="16sp"
                         android:textStyle="bold" />
@@ -172,7 +174,8 @@
                 android:layout_marginBottom="16dp"
                 android:background="@drawable/m31_selector_email_button"
                 android:gravity="center"
-                android:text="Send Report Email"
+                android:text="@string/m31_send_report_email"
+                android:textAllCaps="true"
                 android:textColor="@color/blue_grey_100"
                 android:textSize="16sp"
                 android:textStyle="bold" />
