@@ -4,6 +4,6 @@ internal interface AndromedaViewState <VS: Any> {
 
     fun viewStateHandler(viewState: VS)
 
-    fun getCoreViewStateViewModel(): AndromedaViewStateViewModel<VS>
+    fun getAndromedaViewModel(): AndromedaViewStateViewModel<VS>
 
 }

@@ -5,13 +5,10 @@ import ir.farsroidx.m31.AndromedaActivity
 
 class DatabaseActivity : AndromedaActivity<ActivityDatabaseBinding>() {
 
-    override fun onInitialized() {
+    override fun ActivityDatabaseBinding.onInitialized() {
 
-        binding {
-
-            arrowBack.setOnClickListener {
-                onBackPressed()
-            }
+        arrowBack.setOnClickListener {
+            onBackPressed()
         }
     }
 }

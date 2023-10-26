@@ -14,48 +14,45 @@ import kotlinx.coroutines.withContext
 
 class NetworkActivity : AndromedaActivity<ActivityNetworkBinding>() {
 
-    override fun onInitialized() {
+    override fun ActivityNetworkBinding.onInitialized() {
 
-        binding {
+        arrowBack.setOnClickListener {
+            onBackPressed()
+        }
 
-            arrowBack.setOnClickListener {
-                onBackPressed()
-            }
+        runBlocking(Andromeda.dispatcher.io) {
+            val text = Andromeda.network.get()
+            txtResponse.text = text
+        }
 
-            runBlocking(Andromeda.dispatcher.io) {
-                val text = Andromeda.network.get()
-                txtResponse.text = text
-            }
+        CoroutineScope(Andromeda.dispatcher.io).launch {
 
-            CoroutineScope(Andromeda.dispatcher.io).launch {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                Andromeda.network.observeNetworkStatus().onEach {
 
-                    Andromeda.network.observeNetworkStatus().onEach {
+                    when (it) {
 
-                        when (it) {
+                        ConnectivityStatus.Available -> {
+                            setStatusText("Available")
+                        }
 
-                            ConnectivityStatus.Available -> {
-                                setStatusText("Available")
-                            }
+                        ConnectivityStatus.Losing -> {
+                            setStatusText("Losing")
+                        }
 
-                            ConnectivityStatus.Losing -> {
-                                setStatusText("Losing")
-                            }
+                        ConnectivityStatus.Lost -> {
+                            setStatusText("Lost")
+                        }
 
-                            ConnectivityStatus.Lost -> {
-                                setStatusText("Lost")
-                            }
-
-                            ConnectivityStatus.Unavailable -> {
-                                setStatusText("Unavailable")
-                            }
+                        ConnectivityStatus.Unavailable -> {
+                            setStatusText("Unavailable")
                         }
                     }
-
-                } else {
-                    setStatusText("Inaccessibility")
                 }
+
+            } else {
+                setStatusText("Inaccessibility")
             }
         }
     }

@@ -5,13 +5,10 @@ import ir.farsroidx.m31.AndromedaActivity
 
 class CacheActivity : AndromedaActivity<ActivityCacheBinding>() {
 
-    override fun onInitialized() {
+    override fun ActivityCacheBinding.onInitialized() {
 
-        binding {
-
-            arrowBack.setOnClickListener {
-                onBackPressed()
-            }
+        arrowBack.setOnClickListener {
+            onBackPressed()
         }
     }
 }

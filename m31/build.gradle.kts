@@ -4,6 +4,10 @@ plugins {
     // jetbrains
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.kapt")
+    // maven
+    id("maven-publish")
+    // androidx
+    id("androidx.navigation.safeargs")
 }
 
 android {
@@ -71,6 +75,10 @@ dependencies {
     implementation("io.insert-koin:koin-android:3.5.0")
     implementation("io.insert-koin:koin-ktor:3.5.1")
 
+    // Navigation
+    implementation("androidx.navigation:navigation-ui-ktx:2.7.2")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.7.2")
+
     // Room Database
     implementation("androidx.room:room-runtime:2.6.0-rc01")
     implementation("androidx.room:room-ktx:2.6.0-rc01")
@@ -88,10 +96,6 @@ dependencies {
     // Google
     implementation("com.google.code.gson:gson:2.10.1")
 
-    // Others
-//    implementation("androidx.drawerlayout:drawerlayout:1.2.0")
-//    implementation("androidx.customview:customview:1.1.0")
-
     api("com.airbnb.android:lottie:6.1.0")
     api("com.github.samanzamani:PersianDate:1.6.1")
 
@@ -107,4 +111,23 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 
+}
+
+publishing {
+
+    publications {
+
+        register<MavenPublication>("release") {
+
+            groupId    = "ir.farsroidx"
+            artifactId = "andromeda"
+            version    = "1.0.0"
+
+            afterEvaluate {
+                from(
+                    components["release"]
+                )
+            }
+        }
+    }
 }

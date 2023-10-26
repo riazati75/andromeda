@@ -35,42 +35,39 @@ import kotlinx.coroutines.launch
 internal class AndromedaExceptionActivity : AndromedaActivity<ActivityAndromedaExceptionBinding>() {
 
     private var developerEmail: String = ""
-    private val emailType     : String = "text/html"
-    private val emailSubject  : String = "Crash Report"
-    private var emailHtmlBody : String = ""
+    private val emailType: String = "text/html"
+    private val emailSubject: String = "Crash Report"
+    private var emailHtmlBody: String = ""
 
-    override fun onInitialized() {
+    override fun ActivityAndromedaExceptionBinding.onInitialized() {
 
-        binding {
+        btnClose.setOnClickListener(::onClosePressed)
 
-            btnClose.setOnClickListener(::onClosePressed)
+        btnSendMail.setOnClickListener(::onSendPressed)
 
-            btnSendMail.setOnClickListener(::onSendPressed)
+        developerEmail = intent.getStringExtra(AndromedaExceptionHandler.EXTRA_DEVELOPER) ?: ""
 
-            developerEmail = intent.getStringExtra(AndromedaExceptionHandler.EXTRA_DEVELOPER) ?: ""
+        btnSendMail.visible()
 
-            btnSendMail.visible()
+        intent.getParcelableExtra<ApplicationErrorReport>(
+            AndromedaExceptionHandler.EXTRA_THROWABLE
+        )?.let { errorReport ->
 
-            intent.getParcelableExtra<ApplicationErrorReport>(
-                AndromedaExceptionHandler.EXTRA_THROWABLE
-            )?.let { errorReport ->
+            try {
 
-                try {
+                if (developerEmail.isNotEmpty()) {
 
-                    if (developerEmail.isNotEmpty()) {
+                    showErrorInfo(errorReport)
 
-                        showErrorInfo(errorReport)
+                } else {
 
-                    } else {
+                    toastLong("Developer Email not configuration.")
 
-                        toastLong("Developer Email not configuration.")
-
-                        finish()
-                    }
-
-                } catch (throwable: Throwable) {
-                    showReportActivity(throwable)
+                    finish()
                 }
+
+            } catch (throwable: Throwable) {
+                showReportActivity(throwable)
             }
         }
     }
@@ -311,12 +308,12 @@ internal class AndromedaExceptionActivity : AndromedaActivity<ActivityAndromedaE
 
         ApplicationErrorReport().apply {
             installerPackageName = packageManager.getInstallerPackageName(packageName)
-            crashInfo            = ApplicationErrorReport.CrashInfo(throwable)
-            packageName          = this@AndromedaExceptionActivity.packageName
-            processName          = currentProcessName
-            type                 = ApplicationErrorReport.TYPE_CRASH
-            time                 = System.currentTimeMillis()
-            systemApp            = false
+            crashInfo = ApplicationErrorReport.CrashInfo(throwable)
+            packageName = this@AndromedaExceptionActivity.packageName
+            processName = currentProcessName
+            type = ApplicationErrorReport.TYPE_CRASH
+            time = System.currentTimeMillis()
+            systemApp = false
             startActivity(
                 Intent(Intent.ACTION_APP_ERROR)
                     .setPackage("com.google.android.feedback")
@@ -327,7 +324,7 @@ internal class AndromedaExceptionActivity : AndromedaActivity<ActivityAndromedaE
     }
 
     private fun SpannableStringBuilder.appendByLine(
-         value: CharSequence, enterCount: Int = 1
+        value: CharSequence, enterCount: Int = 1
     ): SpannableStringBuilder {
         this.append(value)
         for (i in 0 until enterCount) {

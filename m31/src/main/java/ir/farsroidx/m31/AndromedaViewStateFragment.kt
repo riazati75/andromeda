@@ -4,7 +4,6 @@ package ir.farsroidx.m31
 
 import android.os.Bundle
 import androidx.databinding.ViewDataBinding
-import androidx.viewbinding.ViewBinding
 
 abstract class AndromedaViewStateFragment <VDB: ViewDataBinding, VS: Any> :
     AndromedaFragment<VDB>(), AndromedaViewState<VS>
@@ -14,6 +13,6 @@ abstract class AndromedaViewStateFragment <VDB: ViewDataBinding, VS: Any> :
         super.onCreate(savedInstanceState)
 
         // Setup viewState
-        getCoreViewStateViewModel().setOnViewStateChanged(lifecycleOwner = this, ::viewStateHandler)
+        getAndromedaViewModel().setOnViewStateChanged(lifecycleOwner = this, ::viewStateHandler)
     }
 }

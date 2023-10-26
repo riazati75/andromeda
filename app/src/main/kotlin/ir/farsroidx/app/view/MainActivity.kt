@@ -7,49 +7,46 @@ import ir.farsroidx.m31.AndromedaActivity
 
 class MainActivity : AndromedaActivity<ActivityMainBinding>() {
 
-    override fun onInitialized() {
-        
-        binding {
+    override fun ActivityMainBinding.onInitialized() {
 
-            app.setOnClickListener {
-                startActivity<AppActivity>()
-            }
+        app.setOnClickListener {
+            startActivity<AppActivity>()
+        }
 
-            exception.setOnClickListener {
-                startActivity<ExceptionActivity>()
-            }
+        exception.setOnClickListener {
+            startActivity<ExceptionActivity>()
+        }
 
-            dispatcher.setOnClickListener {
-                Toast.makeText(baseContext, "View, not available", Toast.LENGTH_SHORT).show()
-            }
+        dispatcher.setOnClickListener {
+            Toast.makeText(baseContext, "View, not available", Toast.LENGTH_SHORT).show()
+        }
 
-            memory.setOnClickListener {
-                startActivity<MemoryActivity>()
-            }
+        memory.setOnClickListener {
+            startActivity<MemoryActivity>()
+        }
 
-            preference.setOnClickListener {
-                startActivity<PreferenceActivity>()
-            }
+        preference.setOnClickListener {
+            startActivity<PreferenceActivity>()
+        }
 
-            cacheFile.setOnClickListener {
-                startActivity<CacheActivity>()
-            }
+        cacheFile.setOnClickListener {
+            startActivity<CacheActivity>()
+        }
 
-            database.setOnClickListener {
-                startActivity<DatabaseActivity>()
-            }
+        database.setOnClickListener {
+            startActivity<DatabaseActivity>()
+        }
 
-            network.setOnClickListener {
-                startActivity<NetworkActivity>()
-            }
+        network.setOnClickListener {
+            startActivity<NetworkActivity>()
+        }
 
-            utils.setOnClickListener {
-                startActivity<UtilsActivity>()
-            }
+        utils.setOnClickListener {
+            startActivity<UtilsActivity>()
+        }
 
-            crypto.setOnClickListener {
-                startActivity<CryptoActivity>()
-            }
+        crypto.setOnClickListener {
+            startActivity<CryptoActivity>()
         }
     }
 

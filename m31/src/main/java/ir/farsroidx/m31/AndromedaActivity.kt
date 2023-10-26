@@ -2,6 +2,7 @@
 
 package ir.farsroidx.m31
 
+import android.app.ProgressDialog
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.net.Uri
@@ -11,11 +12,21 @@ import android.view.View
 import androidx.annotation.CallSuper
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
+import androidx.annotation.IdRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.databinding.ViewDataBinding
+import androidx.fragment.app.FragmentManager
+import androidx.navigation.NavController
+import androidx.navigation.NavDirections
+import androidx.navigation.NavOptions
+import androidx.navigation.Navigator
+import androidx.navigation.findNavController
 import ir.farsroidx.m31.additives.autoViewDataBinding
+import ir.farsroidx.m31.additives.progressDialog
+import ir.farsroidx.m31.model.SerializedData
+import kotlinx.coroutines.Job
 import java.io.Serializable
 
 abstract class AndromedaActivity<VDB : ViewDataBinding> : AppCompatActivity() {
@@ -30,6 +41,20 @@ abstract class AndromedaActivity<VDB : ViewDataBinding> : AppCompatActivity() {
 
     protected var useTransitionAnimation = true
 
+    protected var activeJob: Job? = null
+
+    private lateinit var progressDialog: ProgressDialog
+
+    private var pendingRequests = HashMap<Int, Bundle?>()
+
+    private var navHostFragmentIdCache: Int = -1
+
+    private var backStackChangeListener: FragmentManager.OnBackStackChangedListener? = null
+
+    private var destinationChangeListener: NavController.OnDestinationChangedListener? = null
+
+    private var wasPreviouslyShowingDialog = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         onBeforeInitializing(savedInstanceState)
@@ -38,6 +63,17 @@ abstract class AndromedaActivity<VDB : ViewDataBinding> : AppCompatActivity() {
             if (isRtlDirection) View.LAYOUT_DIRECTION_RTL else View.LAYOUT_DIRECTION_LTR
 
         super.onCreate(savedInstanceState)
+
+        progressDialog = onCreateProgressDialog()
+
+        @Suppress("UNCHECKED_CAST")
+        savedInstanceState?.let {
+            if (it.containsKey(PENDING_REQUESTS)) {
+                pendingRequests = (
+                    it.getSerializable(PENDING_REQUESTS) as SerializedData<HashMap<Int, Bundle?>>
+                    ).serialized
+            }
+        }
 
         // Auto DataBinding
         binding = autoViewDataBinding()
@@ -48,7 +84,7 @@ abstract class AndromedaActivity<VDB : ViewDataBinding> : AppCompatActivity() {
 //            }
 //        })
 
-        onInitialized()
+        binding.onInitialized()
     }
 
     /** Before onCreate called */
@@ -57,7 +93,7 @@ abstract class AndromedaActivity<VDB : ViewDataBinding> : AppCompatActivity() {
     }
 
     /** After onCreate called */
-    protected abstract fun onInitialized()
+    protected abstract fun VDB.onInitialized()
 
     @CallSuper
     protected open fun onBackStackPressed() {
@@ -146,5 +182,218 @@ abstract class AndromedaActivity<VDB : ViewDataBinding> : AppCompatActivity() {
 
     protected fun binding(block: VDB.() -> Unit) = binding.apply {
         block.invoke(this)
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        if (navHostFragmentIdCache != -1) {
+            attachDestinationChangeListener()
+            attachBackStackChangeListener()
+        }
+    }
+
+    private fun attachDestinationChangeListener() {
+
+        destinationChangeListener = NavController
+            .OnDestinationChangedListener { _, destination, arguments ->
+
+                if (destination.navigatorName == DIALOG_NAVIGATOR) {
+                    wasPreviouslyShowingDialog = true
+
+                } else if (
+                    destination.navigatorName == FRAGMENT_NAVIGATOR && wasPreviouslyShowingDialog
+                ) {
+
+                    wasPreviouslyShowingDialog = false
+
+                    backStackChangeListener?.onBackStackChanged()
+                }
+
+                arguments?.getInt(FRAGMENT_REQUEST_CODE, -1)
+                    ?.takeIf {
+                        it > -1
+                    }
+                    ?.also {
+                        pendingRequests[it] = null
+                    }
+
+            }.also {
+                findNavController(navHostFragmentIdCache).addOnDestinationChangedListener(it)
+            }
+    }
+
+    private fun attachBackStackChangeListener() {
+
+        backStackChangeListener = FragmentManager.OnBackStackChangedListener {
+
+            supportFragmentManager.findFragmentById(navHostFragmentIdCache)?.let {
+
+                (it.childFragmentManager.primaryNavigationFragment as AndromedaFragment<*>).apply {
+                    takeIf { fragment ->
+                        fragment.pendingRequest > -1
+                    }
+                    ?.takeIf { fragment ->
+                        pendingRequests[fragment.pendingRequest] != null
+                    }
+                    ?.also { fragment ->
+                        fragment.onFragmentResult(
+                            fragment.pendingRequest,
+                            pendingRequests[fragment.pendingRequest]!!
+                        )
+                    }
+                    ?.also { fragment ->
+                        pendingRequests.remove(fragment.pendingRequest)
+                    }
+                }
+            }
+
+        }.also {
+            supportFragmentManager.findFragmentById(navHostFragmentIdCache)
+                ?.childFragmentManager
+                ?.addOnBackStackChangedListener(it)
+        }
+    }
+
+    internal fun setBundle(requestCode: Int, bundle: Bundle) {
+        pendingRequests[requestCode] = bundle
+    }
+
+    fun navigate(navDirection: NavDirections, requestCode: Int = -1) {
+        navigate(navDirection.actionId, navDirection.arguments, requestCode)
+    }
+
+    fun navigate(
+        navDirection: NavDirections,
+        navOptions: NavOptions?,
+        requestCode: Int = -1
+    ) {
+        navigate(navDirection.actionId, navDirection.arguments, navOptions, null, requestCode)
+    }
+
+    fun navigate(
+        navDirection: NavDirections,
+        navigatorExtras: Navigator.Extras?,
+        requestCode: Int = -1
+    ) {
+        navigate(navDirection.actionId, navDirection.arguments, null, navigatorExtras, requestCode)
+    }
+
+    fun navigate(@IdRes navDirection: Int, requestCode: Int) {
+        navigate(navDirection, null, requestCode)
+    }
+
+    fun navigate(@IdRes navDirection: Int, bundle: Bundle?, requestCode: Int) {
+        navigate(navDirection, bundle, null, requestCode)
+    }
+
+    fun navigate(
+        @IdRes navDirection: Int,
+        bundle: Bundle?,
+        navOptions: NavOptions?,
+        requestCode: Int
+    ) {
+        navigate(navDirection, bundle, navOptions, null, requestCode)
+    }
+
+    fun navigate(
+        @IdRes navDirection: Int,
+        bundle: Bundle?,
+        navOptions: NavOptions?,
+        navigatorExtras: Navigator.Extras?,
+        requestCode: Int
+    ) {
+        if (navHostFragmentIdCache == -1) return
+        supportFragmentManager.findFragmentById(navHostFragmentIdCache)?.let {
+            (it.childFragmentManager.primaryNavigationFragment as AndromedaFragment<*>).apply {
+                navigate(navDirection, bundle, navOptions, navigatorExtras, requestCode)
+            }
+        }
+    }
+
+    fun initNavHostFragmentId(@IdRes navHostId: Int) {
+        navHostFragmentIdCache = navHostId
+    }
+
+    fun updateNavHostFragmentId(@IdRes navHostId: Int) {
+        navHostFragmentIdCache = navHostId
+        reattach()
+    }
+
+    private fun reattach() {
+
+        if (navHostFragmentIdCache != -1) {
+            detachBackStackChangeListener()
+            detachDestinationChangeListener()
+            attachBackStackChangeListener()
+            attachDestinationChangeListener()
+        }
+    }
+
+    private fun detachBackStackChangeListener() {
+        backStackChangeListener?.let {
+            supportFragmentManager.findFragmentById(
+                navHostFragmentIdCache
+            )?.childFragmentManager?.removeOnBackStackChangedListener(it)
+        }
+    }
+
+    private fun detachDestinationChangeListener() {
+        destinationChangeListener?.let {
+            findNavController(navHostFragmentIdCache)
+                .removeOnDestinationChangedListener(
+                    it
+                )
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        outState.putSerializable(
+            PENDING_REQUESTS, SerializedData(pendingRequests)
+        )
+    }
+
+    protected open fun onCreateProgressDialog(): ProgressDialog {
+        return progressDialog()
+    }
+
+    protected fun showProgressDialog() {
+        if (!progressDialog.isShowing) {
+            progressDialog.show()
+        }
+    }
+
+    protected fun hideProgressDialog() {
+        if (progressDialog.isShowing) {
+            progressDialog.dismiss()
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        hideProgressDialog()
+
+        activeJob?.let {
+            if (it.isActive && !it.isCompleted && !it.isCancelled) {
+                it.cancel()
+            }
+        }
+
+        if (navHostFragmentIdCache != -1) {
+            detachBackStackChangeListener()
+            detachDestinationChangeListener()
+        }
+    }
+
+    companion object {
+
+        private const val PENDING_REQUESTS   = "PENDING_REQUESTS"
+        private const val DIALOG_NAVIGATOR   = "DIALOG"
+        private const val FRAGMENT_NAVIGATOR = "FRAGMENT"
+
+        internal const val FRAGMENT_REQUEST_CODE = "fragment:requestCode"
     }
 }

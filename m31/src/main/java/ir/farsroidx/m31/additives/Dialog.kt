@@ -1,5 +1,6 @@
 package ir.farsroidx.m31.additives
 
+import android.app.ProgressDialog
 import android.content.Context
 import android.view.Gravity
 import android.view.View
@@ -58,4 +59,19 @@ fun AlertDialog.showWithCenteredButtons(withVerticalButton: Boolean = false) {
             neutral.layoutParams  = layoutParams
         }
     }
+}
+
+fun Fragment.progressDialog(
+    message: String = "لطفأ منتظر بمانید ..."
+) = requireContext().progressDialog(message)
+
+fun Context.progressDialog(
+    message: String = "لطفأ منتظر بمانید ..."
+) = ProgressDialog(
+    this, R.style.Theme_Andromeda_Dialog
+).apply {
+    progress = 0
+    isIndeterminate = true
+    setMessage(message)
+    setCancelable(false)
 }

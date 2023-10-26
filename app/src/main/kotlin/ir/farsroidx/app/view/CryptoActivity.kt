@@ -3,15 +3,12 @@ package ir.farsroidx.app.view
 import ir.farsroidx.app.databinding.ActivityCryptoBinding
 import ir.farsroidx.m31.AndromedaActivity
 
-class CryptoActivity : AndromedaActivity<ActivityCryptoBinding>()  {
+class CryptoActivity : AndromedaActivity<ActivityCryptoBinding>() {
 
-    override fun onInitialized() {
+    override fun ActivityCryptoBinding.onInitialized() {
 
-        binding {
-
-            arrowBack.setOnClickListener {
-                onBackPressed()
-            }
+        arrowBack.setOnClickListener {
+            onBackPressed()
         }
     }
 }

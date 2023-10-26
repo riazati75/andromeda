@@ -13,6 +13,6 @@ abstract class AndromedaViewStateActivity <VDB: ViewDataBinding, VS: Any> :
         super.onCreate(savedInstanceState)
 
         // Setup viewState
-        getCoreViewStateViewModel().setOnViewStateChanged(lifecycleOwner = this, ::viewStateHandler)
+        getAndromedaViewModel().setOnViewStateChanged(lifecycleOwner = this, ::viewStateHandler)
     }
 }

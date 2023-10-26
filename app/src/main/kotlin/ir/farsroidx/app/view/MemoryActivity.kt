@@ -10,37 +10,35 @@ import kotlinx.coroutines.launch
 
 class MemoryActivity : AndromedaActivity<ActivityMemoryBinding>() {
 
-    override fun onInitialized() {
+    override fun ActivityMemoryBinding.onInitialized() {
 
-        binding {
+        arrowBack.setOnClickListener {
+            onBackPressed()
+        }
 
-            arrowBack.setOnClickListener {
-                onBackPressed()
+        CoroutineScope(Andromeda.dispatcher.io).launch {
+
+            Andromeda.memory.store("Key0", "value0")
+            Andromeda.memory.store("Key1", 1)
+            Andromeda.memory.store("Key2", 2f)
+            Andromeda.memory.store("Key3", 3.3)
+            Andromeda.memory.store("Key4", 4L)
+            Andromeda.memory.store("Key5", false)
+
+            dLog("memory0: " + Andromeda.memory.get<String>("Key0"))
+            dLog("memory1: " + Andromeda.memory.get<Int>("Key1"))
+            dLog("memory2: " + Andromeda.memory.get<Float>("Key2"))
+            dLog("memory3: " + Andromeda.memory.get<Double>("Key3"))
+            dLog("memory4: " + Andromeda.memory.get<Long>("Key4"))
+            dLog("memory5: " + Andromeda.memory.get<Boolean>("Key5"))
+
+            try {
+
+                dLog("memory6: " + Andromeda.memory.get<String>("Key6", "Hi, i'm here!"))
+
+            } catch (e: Exception) {
+                eLog("Exception (memory6): " + e.message)
             }
-
-            CoroutineScope(Andromeda.dispatcher.io).launch {
-
-                Andromeda.memory.store("Key0", "value0")
-                Andromeda.memory.store("Key1", 1)
-                Andromeda.memory.store("Key2", 2f)
-                Andromeda.memory.store("Key3", 3.3)
-                Andromeda.memory.store("Key4", 4L)
-                Andromeda.memory.store("Key5", false)
-
-                dLog("memory0: " + Andromeda.memory.get<String>("Key0"))
-                dLog("memory1: " + Andromeda.memory.get<Int>("Key1"))
-                dLog("memory2: " + Andromeda.memory.get<Float>("Key2"))
-                dLog("memory3: " + Andromeda.memory.get<Double>("Key3"))
-                dLog("memory4: " + Andromeda.memory.get<Long>("Key4"))
-                dLog("memory5: " + Andromeda.memory.get<Boolean>("Key5"))
-
-                try {
-
-                    dLog("memory6: " + Andromeda.memory.get<String>("Key6", "Hi, i'm here!"))
-
-                } catch (e: Exception) {
-                    eLog("Exception (memory6): " + e.message)
-                }
 
 //            Providers.preference.store("Key0", "value0")
 //            Providers.preference.store("Key1", 1)
@@ -63,7 +61,6 @@ class MemoryActivity : AndromedaActivity<ActivityMemoryBinding>() {
 //            } catch (e: Exception) {
 //                Log.d("CentralCore", "Exception (pref-store-Key7): " + e.message)
 //            }
-            }
         }
     }
 }

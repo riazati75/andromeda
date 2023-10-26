@@ -5,19 +5,16 @@ import ir.farsroidx.m31.AndromedaActivity
 
 class ExceptionActivity : AndromedaActivity<ActivityExceptionBinding>() {
 
-    override fun onInitialized() {
+    override fun ActivityExceptionBinding.onInitialized() {
 
-        binding {
+        arrowBack.setOnClickListener {
+            onBackPressed()
+        }
 
-            arrowBack.setOnClickListener {
-                onBackPressed()
-            }
-
-            killProcess.setOnClickListener {
-                throw RuntimeException(
-                    "This error is issued only to test the software."
-                )
-            }
+        killProcess.setOnClickListener {
+            throw RuntimeException(
+                "This error is issued only to test the software."
+            )
         }
     }
 }
