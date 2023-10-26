@@ -2,49 +2,31 @@
 
 package ir.farsroidx.m31.additives
 
-import android.content.Context
-import android.os.Debug
+import android.os.Handler
+import android.os.Looper
 import com.google.gson.Gson
 import ir.farsroidx.m31.AndromedaApplication
-import ir.farsroidx.m31.AndromedaConfig
 import ir.farsroidx.m31.AndromedaException
-import ir.farsroidx.m31.AndromedaState
+import ir.farsroidx.m31.AndromedaProvider
 import ir.farsroidx.m31.app.App
-import ir.farsroidx.m31.app.AppConfig
 import ir.farsroidx.m31.app.AppImpl
 import ir.farsroidx.m31.cache.Cache
-import ir.farsroidx.m31.cache.CacheConfig
 import ir.farsroidx.m31.cache.CacheImpl
 import ir.farsroidx.m31.crypto.Crypto
-import ir.farsroidx.m31.crypto.CryptoConfig
 import ir.farsroidx.m31.crypto.CryptoImpl
 import ir.farsroidx.m31.database.Database
-import ir.farsroidx.m31.database.DatabaseConfig
 import ir.farsroidx.m31.database.DatabaseImpl
 import ir.farsroidx.m31.dispatcher.Dispatcher
-import ir.farsroidx.m31.dispatcher.DispatcherConfig
 import ir.farsroidx.m31.dispatcher.DispatcherImpl
 import ir.farsroidx.m31.download.Download
-import ir.farsroidx.m31.download.DownloadConfig
 import ir.farsroidx.m31.download.DownloadImpl
-import ir.farsroidx.m31.exception.ExceptionHandlerConfig
-import ir.farsroidx.m31.exception.UncaughtExceptionHandlerImpl
 import ir.farsroidx.m31.memory.Memory
-import ir.farsroidx.m31.memory.MemoryConfig
 import ir.farsroidx.m31.memory.MemoryImpl
 import ir.farsroidx.m31.network.Network
-import ir.farsroidx.m31.network.NetworkConfig
 import ir.farsroidx.m31.network.NetworkImpl
 import ir.farsroidx.m31.preference.Preference
-import ir.farsroidx.m31.preference.PreferenceConfig
 import ir.farsroidx.m31.preference.PreferenceImpl
-import ir.farsroidx.m31.utils.Utils
-import ir.farsroidx.m31.utils.UtilsConfig
-import ir.farsroidx.m31.utils.UtilsImpl
-import ir.farsroidx.m31.utils.common.CommonUtils
-import ir.farsroidx.m31.utils.common.CommonUtilsImpl
-import ir.farsroidx.m31.utils.time.TimeUtils
-import ir.farsroidx.m31.utils.time.TimeUtilsImpl
+import ir.farsroidx.m31.view.exception.AndromedaExceptionHandler
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -53,7 +35,7 @@ import org.koin.core.qualifier.Qualifier
 import org.koin.dsl.module
 import org.koin.java.KoinJavaComponent
 
-// TODO: Koin ================================================================================== ///
+// TODO: Koin ============================================================================= Koin ===
 
 internal inline fun <reified T> koinInjector(
     qualifier: Qualifier? = null,
@@ -65,129 +47,114 @@ internal inline fun <reified T> koinInjector(
     }
 }
 
-internal fun initializedKoin(
-    application: AndromedaApplication, configs: List<AndromedaConfig>
-) = startKoin {
+internal inline fun <reified T> isCasted(instance: Any?) = (instance is T)
+
+internal fun AndromedaApplication.installAndromeda(providers: List<AndromedaProvider>) = startKoin {
+
+    val application = this@installAndromeda
+
     androidLogger(Level.NONE)
+
     androidContext(application)
-    mutableListOf(commonModule())
-        .apply {
-            configs.forEach { config ->
-                when (config) {
-                    is ExceptionHandlerConfig -> exceptionModule(application, config)
-                    is AppConfig -> add(appModule())
-                    is CacheConfig -> add(cacheModule(config))
-                    is CryptoConfig -> add(cryptoModule(config))
-                    is DatabaseConfig -> add(databaseModule(config))
-                    is DispatcherConfig -> add(dispatcherModule())
-                    is DownloadConfig -> add(downloadModule(config))
-                    is MemoryConfig -> add(memoryModule(config))
-                    is NetworkConfig -> add(networkModule(config))
-                    is PreferenceConfig -> add(preferenceModule(config))
-                    is UtilsConfig -> add(utilsModule(config))
-                    else -> {
-                        throw AndromedaException(
-                            "This type of AndromedaConfig is not supported, this config is invalid."
-                        )
-                    }
+
+    mutableListOf(commonModule()).apply {
+
+        providers.forEach { provider ->
+
+            when (provider) {
+
+                is AndromedaProvider.ExceptionUi -> exceptionModule(application, provider)
+                is AndromedaProvider.Application -> add(applicationModule(        ))
+                is AndromedaProvider.Cache       -> add(cacheModule      (provider))
+                is AndromedaProvider.Crypto      -> add(cryptoModule     (provider))
+                is AndromedaProvider.Database    -> add(databaseModule   (provider))
+                is AndromedaProvider.Download    -> add(downloadModule   (provider))
+                is AndromedaProvider.Memory      -> add(memoryModule     (provider))
+                is AndromedaProvider.Network     -> add(networkModule    (provider))
+                is AndromedaProvider.Preference  -> add(preferenceModule (provider))
+                else -> {
+                    throw AndromedaException(
+                        "This type of AndromedaConfig is not supported, this config is invalid."
+                    )
                 }
             }
-            modules(this)
         }
+
+        modules(this)
+    }
 }
 
 private fun commonModule() = module {
-    single { Gson() }
-}
 
-private fun exceptionModule(context: Context, config: ExceptionHandlerConfig) {
-    if (!Debug.waitingForDebugger() && !Debug.isDebuggerConnected()) {
-        Thread.setDefaultUncaughtExceptionHandler(
-            UncaughtExceptionHandlerImpl(
-                context, config
-            )
-        )
+    single {
+        Gson()
     }
-}
 
-private fun appModule() = module {
-    single<App> {
-        AppImpl(androidContext())
-    }
-    AndromedaState.isAppInitialized = true
-}
-
-private fun cacheModule(config: CacheConfig) = module {
-    single<Cache> {
-        CacheImpl(
-            androidContext(), config
-        )
-    }
-    AndromedaState.isCacheInitialized = true
-}
-
-private fun cryptoModule(config: CryptoConfig) = module {
-    single<Crypto> {
-        CryptoImpl(config)
-    }
-    AndromedaState.isCryptoInitialized = true
-}
-
-private fun databaseModule(config: DatabaseConfig) = module {
-    single<Database> {
-        DatabaseImpl(config)
-    }
-    AndromedaState.isDatabaseInitialized = true
-}
-
-private fun dispatcherModule() = module {
     single<Dispatcher> {
         DispatcherImpl()
     }
-    AndromedaState.isDispatchersInitialized = true
+
+    single<Handler> {
+        Handler(Looper.getMainLooper())
+    }
 }
 
-private fun downloadModule(config: DownloadConfig) = module {
+private fun exceptionModule(
+    application: AndromedaApplication, provider: AndromedaProvider.ExceptionUi
+) {
+    AndromedaExceptionHandler.install(application, provider.developerEmail)
+}
+
+private fun applicationModule() = module {
+    single<App> {
+        AppImpl(androidContext())
+    }
+}
+
+private fun cacheModule(provider: AndromedaProvider.Cache) = module {
+    single<Cache> {
+        CacheImpl(
+            androidContext(), provider
+        )
+    }
+}
+
+private fun cryptoModule(provider: AndromedaProvider.Crypto) = module {
+    single<Crypto> {
+        CryptoImpl(provider)
+    }
+}
+
+private fun databaseModule(provider: AndromedaProvider.Database) = module {
+    single<Database> {
+        DatabaseImpl(provider)
+    }
+}
+
+private fun downloadModule(provider: AndromedaProvider.Download) = module {
     single<Download> {
-        DownloadImpl(androidContext(), config)
+        DownloadImpl(androidContext(), provider)
     }
-    AndromedaState.isDownloadInitialized = true
 }
 
-private fun memoryModule(config: MemoryConfig) = module {
+private fun memoryModule(provider: AndromedaProvider.Memory) = module {
     single<Memory> {
-        MemoryImpl(config)
+        MemoryImpl(provider)
     }
-    AndromedaState.isMemoryInitialized = true
 }
 
-private fun networkModule(config: NetworkConfig) = module {
+private fun networkModule(provider: AndromedaProvider.Network) = module {
     single<Network> {
         NetworkImpl(
-            androidContext(), config
+            androidContext(), provider
         )
     }
-    AndromedaState.isNetworkInitialized = true
 }
 
-private fun preferenceModule(config: PreferenceConfig) = module {
+private fun preferenceModule(provider: AndromedaProvider.Preference) = module {
     single<Preference> {
         PreferenceImpl(
-            androidContext(), get(), config
+            androidContext(), get(), provider
         )
     }
-    AndromedaState.isPreferenceInitialized = true
-}
-
-private fun utilsModule(config: UtilsConfig) = module {
-    single<CommonUtils> {
-        CommonUtilsImpl(get())
-    }
-    single<TimeUtils> {
-        TimeUtilsImpl()
-    }
-    single<Utils> {
-        UtilsImpl(androidContext(), config, get(), get())
-    }
-    AndromedaState.isUtilsInitialized = true
 }

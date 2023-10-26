@@ -3,26 +3,29 @@ plugins {
     id("com.android.application")
     // jetbrains
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.kapt")
 }
 
 android {
 
-    namespace = "ir.farsroidx.app"
+    namespace  = "ir.farsroidx.app"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "ir.farsroidx.app.m31"
-        minSdk = 21
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        applicationId             = "ir.farsroidx.app.m31"
+        minSdk                    = 21
+        targetSdk                 = 34
+        versionCode               = 1
+        versionName               = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
+
         debug {
 
         }
+
         release {
 
             proguardFiles(
@@ -39,6 +42,10 @@ android {
 
     kotlinOptions {
         jvmTarget = "1.8"
+    }
+
+    buildFeatures {
+        dataBinding = true
     }
 }
 

@@ -2,32 +2,18 @@
 
 package ir.farsroidx.m31.app
 
-import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.provider.Settings.Secure
 import androidx.appcompat.app.AppCompatDelegate
-import ir.farsroidx.m31.additives.killApplication
 import java.util.Locale
 
-@SuppressLint("HardwareIds")
-internal class AppImpl(
-    private val context: Context,
-) : App {
-
-    private val androidDeviceId by lazy {
-        Secure.getString(
-            context.applicationContext.contentResolver, Secure.ANDROID_ID
-        )
-    }
+internal class AppImpl(private val context: Context) : App {
 
     private val clipboardManager by lazy {
         context.getSystemService(Context.CLIPBOARD_SERVICE)
             as ClipboardManager
     }
-
-    override fun getDeviceId(): String = androidDeviceId
 
     override fun copyToClipboard(label: String, data: String): Boolean {
         return try {
@@ -43,14 +29,14 @@ internal class AppImpl(
         }
     }
 
-    override fun pasteFromClipboard(): CharSequence? {
+    override fun pasteFromClipboard(): CharSequence {
         return try {
             val clip = clipboardManager.primaryClip
             val item = clip?.getItemAt(0)
-            return item?.text
+            return item?.text ?: ""
         } catch (th: Throwable) {
             th.printStackTrace()
-            null
+            ""
         }
     }
 
@@ -63,12 +49,9 @@ internal class AppImpl(
         )
     }
 
-    // set auto save pref
+    // Set Auto Save Pref
+
     override fun setThemeMode(@AppThemeMode mode: Int) {
         AppCompatDelegate.setDefaultNightMode(mode)
-    }
-
-    override fun killProcess() {
-        killApplication()
     }
 }

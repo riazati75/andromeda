@@ -1,5 +1,23 @@
 <resources>
+
     <string name="m31_page_title">Report Crash Info</string>
+
     <string name="m31_page_des">An error has occurred</string>
+
+    <string name="m31_app_exception_process">:ExceptionReporter</string>
+
+    <string name="m31_please_wait">Please Wait…</string>
+
     <string name="m31_stack_trace">Stack Trace:</string>
+
+    <string name="m31_email_app_not_found">An email program was not found on your device</string>
+
+    <string name="m31_content_description">Content Description</string>
+
+    <string name="m31_type_here">type here…</string>
+
+    <string name="m31_send_report_email">Send Report Email</string>
+
+    <string name="m31_crash_reporter_title">Crash Reporter</string>
+
 </resources>
