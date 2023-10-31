@@ -6,6 +6,7 @@ import ir.farsroidx.m31.Andromeda
 import ir.farsroidx.m31.AndromedaActivity
 import ir.farsroidx.m31.additives.eLog
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class PreferenceActivity : AndromedaActivity<ActivityPreferenceBinding>() {
@@ -16,7 +17,7 @@ class PreferenceActivity : AndromedaActivity<ActivityPreferenceBinding>() {
             onBackPressed()
         }
 
-        CoroutineScope(Andromeda.dispatcher.io).launch {
+        CoroutineScope(Dispatchers.IO).launch {
 
             Andromeda.preference.store("Key0", "value0")
             Andromeda.preference.store("Key1", 1)

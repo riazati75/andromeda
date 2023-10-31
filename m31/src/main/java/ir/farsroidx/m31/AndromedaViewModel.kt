@@ -1,9 +1,13 @@
+@file:Suppress("MemberVisibilityCanBePrivate")
+
 package ir.farsroidx.m31
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import ir.farsroidx.m31.additives.koinInjector
-import ir.farsroidx.m31.dispatcher.Dispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -11,29 +15,61 @@ import kotlinx.coroutines.withContext
 
 abstract class AndromedaViewModel : ViewModel() {
 
-    protected val dispatcher: Dispatcher by koinInjector()
+    private var _onViewStateChange: (AndromedaViewState) -> Unit = {}
 
-    protected suspend fun doInIo(block: () -> Unit) {
-        withContext(dispatcher.io) {
-            block()
+    private var _lifecycleOwner: LifecycleOwner? = null
+
+    private val _liveViewState = MutableLiveData<AndromedaViewState>()
+    val liveViewState: LiveData<AndromedaViewState> = _liveViewState
+
+    internal fun setOnViewStateChanged(
+        lifecycleOwner: LifecycleOwner, onChange: (AndromedaViewState) -> Unit
+    ) {
+        _lifecycleOwner    = lifecycleOwner
+        _onViewStateChange = onChange
+    }
+
+    protected suspend fun doInIoScope(invoker: () -> Unit) {
+        withContext(Dispatchers.IO) {
+            invoker()
         }
     }
 
-    protected suspend fun doInMain(block: () -> Unit) {
-        withContext(dispatcher.main) {
-            block()
+    protected suspend fun doInMainScope(invoker: () -> Unit) {
+        withContext(Dispatchers.Main) {
+            invoker()
         }
     }
 
-    protected suspend fun doInDefault(block: () -> Unit) {
-        withContext(dispatcher.default) {
-            block()
+    protected suspend fun doInDefaultScope(invoker: () -> Unit) {
+        withContext(Dispatchers.Default) {
+            invoker()
         }
     }
 
     protected fun viewModelScope(
-        block: suspend CoroutineScope.() -> Unit
-    ) = viewModelScope.launch(dispatcher.io) {
-        block()
+        invoker: suspend CoroutineScope.() -> Unit
+    ) = viewModelScope.launch(Dispatchers.IO) {
+        invoker()
+    }
+
+    protected suspend fun setViewState(viewState: AndromedaViewState) {
+        _lifecycleOwner?.let { lifecycleOwner ->
+            doInMainScope {
+                if (lifecycleOwner.lifecycle.currentState != Lifecycle.State.DESTROYED) {
+                    _onViewStateChange( viewState )
+                } else {
+                    // TODO: Nothing to change =====================================================
+                }
+            }
+        }
+    }
+
+    protected fun setLiveDataValue(viewState: AndromedaViewState) {
+        _liveViewState.value = viewState
+    }
+
+    protected fun postLiveDataValue(viewState: AndromedaViewState) {
+        _liveViewState.postValue(viewState)
     }
 }

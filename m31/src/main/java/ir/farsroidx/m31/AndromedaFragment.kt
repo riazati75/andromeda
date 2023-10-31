@@ -1,4 +1,4 @@
-@file:Suppress("MemberVisibilityCanBePrivate", "unused")
+@file:Suppress("MemberVisibilityCanBePrivate", "unused", "DEPRECATION")
 
 package ir.farsroidx.m31
 
@@ -27,6 +27,10 @@ import kotlinx.coroutines.Job
 
 abstract class AndromedaFragment<VDB : ViewDataBinding> : Fragment() {
 
+    companion object {
+        private const val PENDING_REQUEST = "PENDING_REQUEST"
+    }
+
     private lateinit var _binding : VDB
 
     protected val binding : VDB by lazy { _binding }
@@ -39,7 +43,11 @@ abstract class AndromedaFragment<VDB : ViewDataBinding> : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         progressDialog = onCreateProgressDialog()
+
+        // Setup ViewState
+        getAndromedaViewModel()?.setOnViewStateChanged(lifecycleOwner = this, ::viewStateHandler)
     }
 
     override fun onCreateView(
@@ -196,7 +204,7 @@ abstract class AndromedaFragment<VDB : ViewDataBinding> : Fragment() {
         }
     }
 
-    companion object {
-        private const val PENDING_REQUEST = "PENDING_REQUEST"
-    }
+    open fun viewStateHandler(viewState: AndromedaViewState) {}
+
+    open fun getAndromedaViewModel(): AndromedaViewModel? = null
 }

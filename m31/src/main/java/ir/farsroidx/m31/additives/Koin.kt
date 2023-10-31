@@ -16,8 +16,6 @@ import ir.farsroidx.m31.crypto.Crypto
 import ir.farsroidx.m31.crypto.CryptoImpl
 import ir.farsroidx.m31.database.Database
 import ir.farsroidx.m31.database.DatabaseImpl
-import ir.farsroidx.m31.dispatcher.Dispatcher
-import ir.farsroidx.m31.dispatcher.DispatcherImpl
 import ir.farsroidx.m31.download.Download
 import ir.farsroidx.m31.download.DownloadImpl
 import ir.farsroidx.m31.memory.Memory
@@ -88,10 +86,6 @@ private fun commonModule() = module {
 
     single {
         Gson()
-    }
-
-    single<Dispatcher> {
-        DispatcherImpl()
     }
 
     single<Handler> {

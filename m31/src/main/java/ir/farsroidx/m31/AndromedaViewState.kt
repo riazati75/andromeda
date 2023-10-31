@@ -1,9 +1,3 @@
 package ir.farsroidx.m31
 
-internal interface AndromedaViewState <VS: Any> {
-
-    fun viewStateHandler(viewState: VS)
-
-    fun getAndromedaViewModel(): AndromedaViewStateViewModel<VS>
-
-}
+data class AndromedaViewState(val key: String, val data: Any?)

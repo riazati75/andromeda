@@ -7,19 +7,19 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import ir.farsroidx.m31.model.FragmentData
 
-@Suppress("unused")
 class AndromedaFragmentStateAdapter(
     private val fragmentActivity: FragmentActivity
 ) : FragmentStateAdapter(fragmentActivity.supportFragmentManager, fragmentActivity.lifecycle) {
 
-    private val mFragments = mutableListOf<CoreFragmentModel>()
+    private val mFragments = mutableListOf<FragmentData>()
 
     override fun getItemCount(): Int = mFragments.size
 
     override fun createFragment(position: Int): Fragment = mFragments[position].fragment
 
-    fun addFragment(vararg fragments: CoreFragmentModel) {
+    fun addFragment(vararg fragments: FragmentData) {
         synchronized(mFragments) {
             fragments.forEach {
                 mFragments.add(it)
@@ -28,7 +28,7 @@ class AndromedaFragmentStateAdapter(
         }
     }
 
-    fun getByPosition(position: Int): CoreFragmentModel {
+    fun getByPosition(position: Int): FragmentData {
         return mFragments[position]
     }
 
@@ -46,10 +46,4 @@ class AndromedaFragmentStateAdapter(
             fragmentActivity, icon
         )
     }
-
-    data class CoreFragmentModel(
-        val fragment: Fragment,
-        val title: String = "",
-        val icon: Int? = null
-    )
 }

@@ -31,6 +31,15 @@ import java.io.Serializable
 
 abstract class AndromedaActivity<VDB : ViewDataBinding> : AppCompatActivity() {
 
+    companion object {
+
+        private const val PENDING_REQUESTS   = "PENDING_REQUESTS"
+        private const val DIALOG_NAVIGATOR   = "DIALOG"
+        private const val FRAGMENT_NAVIGATOR = "FRAGMENT"
+
+        internal const val FRAGMENT_REQUEST_CODE = "fragment:requestCode"
+    }
+
     protected lateinit var binding : VDB
         private set
 
@@ -77,6 +86,9 @@ abstract class AndromedaActivity<VDB : ViewDataBinding> : AppCompatActivity() {
 
         // Auto DataBinding
         binding = autoViewDataBinding()
+
+        // Setup ViewState
+        getAndromedaViewModel()?.setOnViewStateChanged(this, ::viewStateHandler)
 
 //        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true){
 //            override fun handleOnBackPressed() {
@@ -388,12 +400,7 @@ abstract class AndromedaActivity<VDB : ViewDataBinding> : AppCompatActivity() {
         }
     }
 
-    companion object {
+    open fun viewStateHandler(viewState: AndromedaViewState) {}
 
-        private const val PENDING_REQUESTS   = "PENDING_REQUESTS"
-        private const val DIALOG_NAVIGATOR   = "DIALOG"
-        private const val FRAGMENT_NAVIGATOR = "FRAGMENT"
-
-        internal const val FRAGMENT_REQUEST_CODE = "fragment:requestCode"
-    }
+    open fun getAndromedaViewModel(): AndromedaViewModel? = null
 }

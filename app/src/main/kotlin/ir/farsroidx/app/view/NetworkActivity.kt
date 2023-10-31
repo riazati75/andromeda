@@ -7,6 +7,7 @@ import ir.farsroidx.m31.Andromeda
 import ir.farsroidx.m31.AndromedaActivity
 import ir.farsroidx.m31.network.ConnectivityStatus
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -20,12 +21,12 @@ class NetworkActivity : AndromedaActivity<ActivityNetworkBinding>() {
             onBackPressed()
         }
 
-        runBlocking(Andromeda.dispatcher.io) {
+        runBlocking(Dispatchers.IO) {
             val text = Andromeda.network.get()
             txtResponse.text = text
         }
 
-        CoroutineScope(Andromeda.dispatcher.io).launch {
+        CoroutineScope(Dispatchers.IO).launch {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 
@@ -59,7 +60,7 @@ class NetworkActivity : AndromedaActivity<ActivityNetworkBinding>() {
 
     @SuppressLint("SetTextI18n")
     private suspend fun setStatusText(text: CharSequence) {
-        withContext(Andromeda.dispatcher.main) {
+        withContext(Dispatchers.Main) {
             binding.connectivityTextView.text = "Connectivity Status: $text"
         }
     }

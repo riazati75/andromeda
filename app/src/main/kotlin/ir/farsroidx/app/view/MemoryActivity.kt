@@ -6,6 +6,7 @@ import ir.farsroidx.m31.AndromedaActivity
 import ir.farsroidx.m31.additives.dLog
 import ir.farsroidx.m31.additives.eLog
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class MemoryActivity : AndromedaActivity<ActivityMemoryBinding>() {
@@ -16,7 +17,7 @@ class MemoryActivity : AndromedaActivity<ActivityMemoryBinding>() {
             onBackPressed()
         }
 
-        CoroutineScope(Andromeda.dispatcher.io).launch {
+        CoroutineScope(Dispatchers.IO).launch {
 
             Andromeda.memory.store("Key0", "value0")
             Andromeda.memory.store("Key1", 1)
